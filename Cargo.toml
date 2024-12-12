@@ -1,0 +1,17 @@
+[workspace]
+members = ["client", "server"]
+resolver = "2"
+
+# Common workspace metadata.
+[workspace.package]
+version = "0.0.0"
+authors = ["Aleksey Sidorov <sauron1987@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+rust-version = "1.82"
+
+[workspace.dependencies]
+tower = "0.5.1"
+tower-tower-http = "0.6.2"
+tower-http-client = "0.4.1"
+reqwest = "0.12.9"
