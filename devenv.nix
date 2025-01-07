@@ -1,5 +1,8 @@
-{ pkgs, ... }:
-
+{ inputs, pkgs, ... }:
+let
+  treefmt-nix = inputs.treefmt-nix;
+  treefmt = (treefmt-nix.lib.evalModule pkgs ./treefmt.nix).config.build;
+in
 {
   packages = with pkgs; [
     cargo-nextest
@@ -35,6 +38,11 @@
   pre-commit.hooks = {
     nixpkgs-fmt.enable = true;
     rustfmt.enable = true;
+    clippy.enable = true;
     shellcheck.enable = true;
+    treefmt = {
+      enable = true;
+      package = treefmt.wrapper;
+    };
   };
 }
