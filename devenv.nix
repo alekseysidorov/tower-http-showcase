@@ -1,8 +1,4 @@
-{ inputs, pkgs, ... }:
-let
-  treefmt-nix = inputs.treefmt-nix;
-  treefmt = (treefmt-nix.lib.evalModule pkgs ./treefmt.nix).config.build;
-in
+{ pkgs, ... }:
 {
   packages = with pkgs; [
     cargo-nextest
@@ -35,14 +31,12 @@ in
     echo "Hello world"
   '';
 
-  pre-commit.hooks = {
+  git-hooks.hooks = {
+    clippy.enable = true;
+    markdownlint.enable = true;
     nixpkgs-fmt.enable = true;
     rustfmt.enable = true;
-    clippy.enable = true;
     shellcheck.enable = true;
-    treefmt = {
-      enable = true;
-      package = treefmt.wrapper;
-    };
+    taplo.enable = true;
   };
 }

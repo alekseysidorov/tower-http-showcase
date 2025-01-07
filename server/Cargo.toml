@@ -11,8 +11,8 @@ publish = false
 [dependencies]
 showcase-common = { workspace = true }
 
-log = { workspace = true }
-env_logger = { workspace = true }
 axum = { workspace = true }
+env_logger = { workspace = true }
 eyre = { workspace = true }
+log = { workspace = true }
 tokio = { workspace = true }
