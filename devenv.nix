@@ -10,9 +10,15 @@
 
   enterShell = "";
 
+  env.RUST_LOG = "info";
+
   scripts = {
     ci-lints.exec = "cargo clippy";
     ci-tests.exec = "cargo nextest run";
+  };
+
+  processes = {
+    showcase-server.exec = "cargo run --bin showcase-server";
   };
 
   # https://devenv.sh/tasks/
