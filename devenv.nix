@@ -3,6 +3,9 @@
   packages = with pkgs; [
     cargo-nextest
     git
+    jq
+    pkg-config
+    openssl.dev
   ];
 
   languages.rust = {
