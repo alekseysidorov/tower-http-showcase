@@ -1,9 +1,9 @@
-use axum::{response::IntoResponse, routing::get, Router};
+use axum::{routing::get, Router};
 use log::info;
-use showcase_common::HelloMessage;
+use showcase_common::model::HelloMessage;
 use tokio::net::TcpListener;
 
-async fn hello_world() -> impl IntoResponse {
+async fn hello_world() -> axum::Json<HelloMessage> {
     axum::Json(HelloMessage {
         message: "Hello, World!".to_string(),
     })
@@ -20,7 +20,7 @@ async fn main() -> eyre::Result<()> {
 
     info!(
         server_address:? = listener.local_addr();
-        "Starting server..."
+        "Starting server"
     );
 
     axum::serve(listener, router).await?;

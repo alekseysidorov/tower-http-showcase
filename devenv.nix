@@ -5,11 +5,14 @@
     git
   ];
 
-  languages.rust.enable = true;
+  languages.rust = {
+    enable = true;
+  };
 
   enterShell = "";
 
   env.RUST_LOG = "info";
+  env.SHOWCASE_SERVER_PORT = "8080";
 
   scripts = {
     ci-lints.exec = "cargo clippy";

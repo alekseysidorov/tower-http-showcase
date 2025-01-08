@@ -1,6 +1,6 @@
 use http::{header::USER_AGENT, HeaderValue};
 use log::info;
-use showcase_common::HelloMessage;
+use showcase_common::model::HelloMessage;
 use tower::{ServiceBuilder, ServiceExt as _};
 use tower_http::ServiceBuilderExt as _;
 use tower_http_client::{adapters::reqwest::HttpClientLayer, ResponseExt as _, ServiceExt as _};
