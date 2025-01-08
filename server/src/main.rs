@@ -1,9 +1,12 @@
 use axum::{response::IntoResponse, routing::get, Router};
 use log::info;
+use showcase_common::HelloMessage;
 use tokio::net::TcpListener;
 
 async fn hello_world() -> impl IntoResponse {
-    axum::Json("Hello, world!")
+    axum::Json(HelloMessage {
+        message: "Hello, World!".to_string(),
+    })
 }
 
 #[tokio::main]
