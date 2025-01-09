@@ -9,7 +9,7 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
-showcase-common = { workspace = true }
+showcase-api = { workspace = true }
 
 axum = { workspace = true }
 env_logger = { workspace = true }

@@ -1,6 +1,6 @@
 use http::{header::USER_AGENT, HeaderValue};
 use log::info;
-use showcase_common::model::HelloMessage;
+use showcase_api::model::{HelloRequest, HelloResponse};
 use structured_logger::{async_json::new_writer, Builder};
 use tower::{ServiceBuilder, ServiceExt as _};
 use tower_http::ServiceBuilderExt as _;
@@ -31,7 +31,7 @@ async fn main() -> eyre::Result<()> {
         .init();
 
     let mut client = make_client(reqwest::Client::new());
-    let server_address = format!("http://localhost:{}", showcase_common::DEFAULT_SERVER_PORT);
+    let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
 
     info!(
         server_address;
@@ -40,10 +40,13 @@ async fn main() -> eyre::Result<()> {
 
     let response = client
         .get(format!("{server_address}/hello"))
+        .json(&HelloRequest {
+            name: "Vasya Pupkin".to_string(),
+        })?
         .send()?
         .await?;
 
-    let body = response.body_reader().json::<HelloMessage>().await?;
+    let body = response.body_reader().json::<HelloResponse>().await?;
     info!(
         body:serde;
         "Received response"

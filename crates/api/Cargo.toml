@@ -1,5 +1,5 @@
 [package]
-name = "showcase-common"
+name = "showcase-api"
 
 version.workspace = true
 authors.workspace = true

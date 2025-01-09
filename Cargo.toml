@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/client", "crates/common", "crates/server"]
+members = ["crates/client", "crates/api", "crates/server"]
 resolver = "2"
 
 # Common workspace metadata.
@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.82"
 
 [workspace.dependencies]
-showcase-common = { path = "crates/common", version = "0.0.0" }
+showcase-api = { path = "crates/api", version = "0.0.0" }
 
 axum = "0.8"
 env_logger = { version = "0.11.6", features = ["unstable-kv"] }
