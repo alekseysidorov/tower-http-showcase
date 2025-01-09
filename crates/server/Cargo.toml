@@ -12,7 +12,7 @@ publish = false
 showcase-api = { workspace = true }
 
 axum = { workspace = true }
-env_logger = { workspace = true }
 eyre = { workspace = true }
 log = { workspace = true }
+structured-logger = { workspace = true }
 tokio = { workspace = true }
