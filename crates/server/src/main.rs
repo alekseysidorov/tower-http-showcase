@@ -1,16 +1,6 @@
-use axum::{routing::get, Router};
 use log::info;
-use showcase_api::model::{HelloRequest, HelloResponse};
 use structured_logger::{async_json::new_writer, Builder};
 use tokio::net::TcpListener;
-
-async fn hello_world(
-    axum::extract::Json(request): axum::extract::Json<HelloRequest>,
-) -> axum::Json<HelloResponse> {
-    axum::Json(HelloResponse {
-        message: format!("Hello, {}!", request.name),
-    })
-}
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -18,7 +8,8 @@ async fn main() -> eyre::Result<()> {
         .with_target_writer("*", new_writer(tokio::io::stdout()))
         .init();
 
-    let router = Router::new().route("/hello", get(hello_world));
+    let state = showcase_server::state::AppState.into();
+    let router = showcase_server::http::make_router(state);
 
     let address = format!("0.0.0.0:{}", showcase_api::DEFAULT_SERVER_PORT);
     let listener = TcpListener::bind(address).await?;

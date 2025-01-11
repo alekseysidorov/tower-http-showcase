@@ -1,27 +1,21 @@
 use http::{header::USER_AGENT, HeaderValue};
 use log::info;
-use showcase_api::model::{HelloRequest, HelloResponse};
+use showcase_api::{model::HelloRequest, HelloServiceClient};
+use showcase_client::HttpClient;
 use structured_logger::{async_json::new_writer, Builder};
 use tower::{ServiceBuilder, ServiceExt as _};
 use tower_http::ServiceBuilderExt as _;
-use tower_http_client::{adapters::reqwest::HttpClientLayer, ResponseExt as _, ServiceExt as _};
-
-/// Implementation agnostic HTTP client.
-type HttpClient = tower::util::BoxCloneService<
-    http::Request<reqwest::Body>,
-    http::Response<reqwest::Body>,
-    eyre::Error,
->;
+use tower_http_client::adapters::reqwest::HttpClientLayer;
 
 fn make_client(client: reqwest::Client) -> HttpClient {
-    ServiceBuilder::new()
+    let service = ServiceBuilder::new()
         // Add some layers.
         .override_request_header(USER_AGENT, HeaderValue::from_static("tower-http-client"))
         // Make client compatible with the `tower-http` layers.
         .layer(HttpClientLayer)
         .service(client)
-        .map_err(eyre::Error::from)
-        .boxed_clone()
+        .map_err(eyre::Error::from);
+    tower_http_client::util::BoxCloneSyncService::new(service)
 }
 
 #[tokio::main]
@@ -30,25 +24,23 @@ async fn main() -> eyre::Result<()> {
         .with_target_writer("*", new_writer(tokio::io::stdout()))
         .init();
 
-    let mut client = make_client(reqwest::Client::new());
+    let inner_client = make_client(reqwest::Client::new());
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
+
+    let mut hello_client = showcase_client::HttpClientWithUrl::new(&server_address, inner_client);
 
     info!(
         server_address;
         "Sending simple hello request"
     );
 
-    let response = client
-        .get(format!("{server_address}/hello"))
-        .json(&HelloRequest {
-            name: "Vasya Pupkin".to_string(),
-        })?
-        .send()?
+    let response = hello_client
+        .say_hello(HelloRequest {
+            name: "Alice".to_string(),
+        })
         .await?;
-
-    let body = response.body_reader().json::<HelloResponse>().await?;
     info!(
-        body:serde;
+        response:serde;
         "Received response"
     );
 
