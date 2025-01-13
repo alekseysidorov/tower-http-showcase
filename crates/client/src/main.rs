@@ -27,22 +27,26 @@ async fn main() -> eyre::Result<()> {
     let inner_client = make_client(reqwest::Client::new());
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
 
-    let mut hello_client = showcase_client::HttpClientWithUrl::new(&server_address, inner_client);
+    for node_id in 0..16 {
+        let node_address = format!("{server_address}/{node_id}");
+        let mut hello_client =
+            showcase_client::HttpClientWithUrl::new(node_address, inner_client.clone());
 
-    info!(
-        server_address;
-        "Sending simple hello request"
-    );
+        info!(
+            server_address, node_id;
+            "Sending simple hello request"
+        );
 
-    let response = hello_client
-        .say_hello(HelloRequest {
-            name: "Alice".to_string(),
-        })
-        .await?;
-    info!(
-        response:serde;
-        "Received response"
-    );
+        let response = hello_client
+            .say_hello(HelloRequest {
+                name: "Alice".to_string(),
+            })
+            .await?;
+        info!(
+            response:serde, node_id;
+            "Received response"
+        );
+    }
 
     Ok(())
 }

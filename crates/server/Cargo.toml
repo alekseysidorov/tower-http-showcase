@@ -13,6 +13,10 @@ showcase-api = { workspace = true }
 
 axum = { workspace = true }
 eyre = { workspace = true }
+humantime-serde = { workspace = true }
 log = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
 structured-logger = { workspace = true }
 tokio = { workspace = true }
+tower = { workspace = true }
