@@ -1,10 +1,7 @@
-use std::{convert::Infallible, time::Duration};
+use std::convert::Infallible;
 
-use axum::{
-    http::{Response, StatusCode},
-    BoxError, Router,
-};
-use headers::{HeaderMapExt as _, UserAgent};
+use axum::Router;
+use headers::HeaderMapExt as _;
 use serde::Serialize;
 use tower::{service_fn, Service, ServiceBuilder};
 

@@ -6,7 +6,7 @@
     jq
     pkg-config
     openssl.dev
-  ] ++ lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk; [
+  ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk; [
     frameworks.Security
   ]);
 

@@ -46,7 +46,7 @@ impl HelloService for HelloServiceImpl<'_> {
 }
 
 impl AppState {
-    pub fn hello_service<'a>(&'a self, node_id: u16) -> Option<impl HelloService + 'a> {
+    pub fn hello_service(&self, node_id: u16) -> Option<impl HelloService + '_> {
         self.nodes
             .get(node_id as usize)
             .map(|node| HelloServiceImpl { node })

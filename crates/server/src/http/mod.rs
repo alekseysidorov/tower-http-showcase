@@ -25,7 +25,7 @@ mod routes {
     ) -> Result<Json<HelloResponse>, StatusCode> {
         let service = state
             .hello_service(node_id)
-            .ok_or_else(|| StatusCode::BAD_REQUEST)?;
+            .ok_or(StatusCode::BAD_REQUEST)?;
 
         let message = service.say_hello(&request.name).await;
         Ok(Json(HelloResponse { message }))
