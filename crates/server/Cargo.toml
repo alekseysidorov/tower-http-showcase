@@ -13,6 +13,8 @@ showcase-api = { workspace = true }
 
 axum = { workspace = true }
 eyre = { workspace = true }
+future-local-storage = { workspace = true }
+headers = { workspace = true }
 humantime-serde = { workspace = true }
 log = { workspace = true }
 rand = { workspace = true }

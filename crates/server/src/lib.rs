@@ -4,8 +4,9 @@ use axum::{
     http::{Response, StatusCode},
     BoxError, Router,
 };
+use headers::{HeaderMapExt as _, UserAgent};
 use serde::Serialize;
-use tower::ServiceBuilder;
+use tower::{service_fn, Service, ServiceBuilder};
 
 pub mod config;
 pub mod delay_iter;
@@ -19,23 +20,41 @@ struct ResponseInfo {
     status_code: u16,
 }
 
-pub fn set_middlewares(router: Router) -> Router {
-    router.layer(ServiceBuilder::new().map_future(|future| async move {
-        let time = tokio::time::Instant::now();
-        let response: Response<_> = future.await?;
-        let elapsed = time.elapsed();
+#[derive(Debug, Serialize)]
+struct RequestInfo {
+    user_agent: Option<String>,
+}
 
-        {
-            let response = ResponseInfo {
-                duration_ms: elapsed.as_secs_f64() * 1000.0,
-                status_code: response.status().as_u16(),
-            };
-            log::info!(
-                response:serde;
-                "Request handled"
-            );
-        }
+pub fn attach_middlewares(router: Router) -> Router {
+    router.layer(
+        ServiceBuilder::new().layer_fn(|mut service: axum::routing::Route| {
+            service_fn(move |req: axum::extract::Request| {
+                let user_agent = req
+                    .headers()
+                    .typed_get::<headers::UserAgent>()
+                    .map(|x| x.to_string());
 
-        Ok::<_, Infallible>(response)
-    }))
+                let fut = service.call(req);
+                async move {
+                    let time = tokio::time::Instant::now();
+                    let response = fut.await?;
+                    let elapsed = time.elapsed();
+
+                    {
+                        let request = RequestInfo { user_agent };
+                        let response = ResponseInfo {
+                            duration_ms: elapsed.as_secs_f64() * 1000.0,
+                            status_code: response.status().as_u16(),
+                        };
+                        log::info!(
+                            request:serde, response:serde;
+                            "Request handled"
+                        );
+                    }
+
+                    Ok::<_, Infallible>(response)
+                }
+            })
+        }),
+    )
 }
