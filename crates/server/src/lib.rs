@@ -1,6 +1,6 @@
-use std::convert::Infallible;
+use std::{convert::Infallible, time::Duration};
 
-use axum::Router;
+use axum::{error_handling::HandleErrorLayer, http::StatusCode, BoxError, Router};
 use headers::HeaderMapExt as _;
 use serde::Serialize;
 use tower::{service_fn, Service, ServiceBuilder};
@@ -24,34 +24,42 @@ struct RequestInfo {
 
 pub fn attach_middlewares(router: Router) -> Router {
     router.layer(
-        ServiceBuilder::new().layer_fn(|mut service: axum::routing::Route| {
-            service_fn(move |req: axum::extract::Request| {
-                let user_agent = req
-                    .headers()
-                    .typed_get::<headers::UserAgent>()
-                    .map(|x| x.to_string());
+        ServiceBuilder::new()
+            .layer(HandleErrorLayer::new(handle_error))
+            .buffer(1024)
+            .rate_limit(250, Duration::from_secs(1))
+            .layer_fn(|mut service: axum::routing::Route| {
+                service_fn(move |req: axum::extract::Request| {
+                    let user_agent = req
+                        .headers()
+                        .typed_get::<headers::UserAgent>()
+                        .map(|x| x.to_string());
 
-                let fut = service.call(req);
-                async move {
-                    let time = tokio::time::Instant::now();
-                    let response = fut.await?;
-                    let elapsed = time.elapsed();
+                    let fut = service.call(req);
+                    async move {
+                        let time = tokio::time::Instant::now();
+                        let response = fut.await?;
+                        let elapsed = time.elapsed();
 
-                    {
-                        let request = RequestInfo { user_agent };
-                        let response = ResponseInfo {
-                            duration_ms: elapsed.as_secs_f64() * 1000.0,
-                            status_code: response.status().as_u16(),
-                        };
-                        log::info!(
-                            request:serde, response:serde;
-                            "Request handled"
-                        );
+                        {
+                            let request = RequestInfo { user_agent };
+                            let response = ResponseInfo {
+                                duration_ms: elapsed.as_secs_f64() * 1000.0,
+                                status_code: response.status().as_u16(),
+                            };
+                            log::info!(
+                                request:serde, response:serde;
+                                "Request handled"
+                            );
+                        }
+
+                        Ok::<_, Infallible>(response)
                     }
-
-                    Ok::<_, Infallible>(response)
-                }
-            })
-        }),
+                })
+            }),
     )
+}
+
+async fn handle_error(err: BoxError) -> (StatusCode, String) {
+    (StatusCode::INTERNAL_SERVER_ERROR, format!("`{err}"))
 }
