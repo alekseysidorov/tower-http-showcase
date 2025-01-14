@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   packages = with pkgs; [
     cargo-nextest
@@ -6,10 +6,13 @@
     jq
     pkg-config
     openssl.dev
-  ];
+  ] ++ lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk; [
+    frameworks.Security
+  ]);
 
   languages.rust = {
     enable = true;
+    channel = "stable";
   };
 
   enterShell = "";
@@ -34,7 +37,8 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
-    echo "Hello world"
+    wait_for_port $SHOWCASE_SERVER_PORT
+    cargo run -p showcase-client --example check_server
   '';
 
   git-hooks.hooks = {
