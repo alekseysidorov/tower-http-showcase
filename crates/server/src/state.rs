@@ -2,29 +2,14 @@ use std::{future::Future, sync::Arc};
 
 use tokio::sync::Mutex;
 
-use crate::{config::AppConfig, delay_iter::DelayIter};
+use crate::delay_iter::DelayIter;
 
 #[derive(Debug)]
 pub struct AppState {
-    nodes: Vec<Mutex<DelayIter>>,
+    delays_iter: Mutex<DelayIter>,
 }
 
 pub type SharedAppState = Arc<AppState>;
-
-impl AppState {
-    pub fn new(config: AppConfig) -> Self {
-        let nodes = (0..config.nodes_count)
-            .map(|node_id| {
-                Mutex::new(DelayIter::new(
-                    node_id,
-                    config.response_delays.min..config.response_delays.max,
-                ))
-            })
-            .collect();
-
-        Self { nodes }
-    }
-}
 
 // TODO When example is ready, move this implementation to the more appropriate place.
 pub trait HelloService {
@@ -33,12 +18,12 @@ pub trait HelloService {
 
 #[derive(Debug)]
 struct HelloServiceImpl<'a> {
-    node: &'a Mutex<DelayIter>,
+    delays_iter: &'a Mutex<DelayIter>,
 }
 
 impl HelloService for HelloServiceImpl<'_> {
     async fn say_hello(&self, name: &str) -> String {
-        let duration = self.node.lock().await.next().unwrap();
+        let duration = self.delays_iter.lock().await.next().unwrap();
         tokio::time::sleep(duration).await;
 
         format!("Hello, {}!", name)
@@ -46,9 +31,15 @@ impl HelloService for HelloServiceImpl<'_> {
 }
 
 impl AppState {
-    pub fn hello_service(&self, node_id: u16) -> Option<impl HelloService + '_> {
-        self.nodes
-            .get(node_id as usize)
-            .map(|node| HelloServiceImpl { node })
+    pub fn new(delay_iter: DelayIter) -> Self {
+        Self {
+            delays_iter: Mutex::new(delay_iter),
+        }
+    }
+
+    pub fn hello_service(&self) -> impl HelloService + '_ {
+        HelloServiceImpl {
+            delays_iter: &self.delays_iter,
+        }
     }
 }

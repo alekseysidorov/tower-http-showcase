@@ -28,12 +28,12 @@ async fn main() -> eyre::Result<()> {
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
 
     for node_id in 0..16 {
-        let node_address = format!("{server_address}/{node_id}");
+        let node_address = format!("{server_address}/node/{node_id}");
         let mut hello_client =
-            showcase_client::HttpClientWithUrl::new(node_address, inner_client.clone());
+            showcase_client::HttpClientWithUrl::new(&node_address, inner_client.clone());
 
         info!(
-            server_address, node_id;
+            node_address;
             "Sending simple hello request"
         );
 
