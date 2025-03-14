@@ -17,8 +17,6 @@ impl Iterator for DelayIter {
     type Item = Duration;
 
     fn next(&mut self) -> Option<Self::Item> {
-        rand::thread_rng()
-            .gen_range(self.delay_range.clone())
-            .into()
+        rand::rng().random_range(self.delay_range.clone()).into()
     }
 }
