@@ -5,7 +5,7 @@ use showcase_api::{
 use tower_http_client::{ResponseExt as _, ServiceExt as _};
 
 /// Implementation agnostic HTTP client.
-pub type HttpClient = tower_http_client::util::BoxCloneSyncService<
+pub type HttpClient = tower::util::BoxCloneSyncService<
     http::Request<reqwest::Body>,
     http::Response<reqwest::Body>,
     eyre::Error,
@@ -37,7 +37,7 @@ impl HelloServiceClient for HttpClientWithUrl {
             .client
             .get(format!("{}/hello", self.base_url))
             .json(&request)?
-            .send()?
+            .send()
             .await?;
         let body = response.body_reader().json::<HelloResponse>().await?;
 
