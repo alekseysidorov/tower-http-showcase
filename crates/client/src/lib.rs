@@ -1,44 +1,33 @@
 use showcase_api::{
     model::{HelloRequest, HelloResponse},
-    HelloServiceClient,
+    HelloService,
 };
 use tower_http_client::{ResponseExt as _, ServiceExt as _};
 
 /// Implementation agnostic HTTP client.
-pub type HttpClient = tower::util::BoxCloneSyncService<
+type BoxedClient = tower::util::BoxCloneSyncService<
     http::Request<reqwest::Body>,
     http::Response<reqwest::Body>,
     eyre::Error,
 >;
 
 #[derive(Clone, Debug)]
-pub struct HttpClientWithUrl {
-    base_url: String,
-    client: HttpClient,
-}
+pub struct HelloClient(BoxedClient);
 
-impl HttpClientWithUrl {
-    pub fn new(base_url: impl Into<String>, client: HttpClient) -> Self {
-        Self {
-            client,
-            base_url: base_url.into(),
-        }
+impl HelloClient {
+    pub fn new(inner: impl Into<BoxedClient>) -> Self {
+        Self(inner.into())
     }
 }
 
-impl HelloServiceClient for HttpClientWithUrl {
+impl HelloService for HelloClient {
     type TransportError = eyre::Error;
 
     async fn say_hello(
         &mut self,
         request: HelloRequest,
     ) -> Result<HelloResponse, Self::TransportError> {
-        let response = self
-            .client
-            .get(format!("{}/hello", self.base_url))
-            .json(&request)?
-            .send()
-            .await?;
+        let response = self.0.get("/hello").json(&request)?.send().await?;
         let body = response.body_reader().json::<HelloResponse>().await?;
 
         Ok(body)
