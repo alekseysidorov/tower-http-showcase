@@ -2,26 +2,35 @@ use showcase_api::{
     model::{HelloRequest, HelloResponse},
     HelloService,
 };
+use tower::Service;
 use tower_http_client::{ResponseExt as _, ServiceExt as _};
 
 /// Implementation agnostic HTTP client.
-type BoxedClient = tower::util::BoxCloneSyncService<
+pub type BoxedHttpClient = tower::util::BoxCloneSyncService<
     http::Request<reqwest::Body>,
     http::Response<reqwest::Body>,
     eyre::Error,
 >;
 
 #[derive(Clone, Debug)]
-pub struct HelloClient(BoxedClient);
+pub struct HelloClient<S>(S);
 
-impl HelloClient {
-    pub fn new(inner: impl Into<BoxedClient>) -> Self {
-        Self(inner.into())
+impl<S> HelloClient<S> {
+    pub fn new(inner: S) -> Self {
+        Self(inner)
     }
 }
 
-impl HelloService for HelloClient {
-    type TransportError = eyre::Error;
+impl<S> HelloService for HelloClient<S>
+where
+    S: Service<
+        http::Request<reqwest::Body>,
+        Response = http::Response<reqwest::Body>,
+        Error = eyre::Error,
+    >,
+    S::Future: Send + 'static,
+{
+    type TransportError = S::Error;
 
     async fn say_hello(
         &mut self,

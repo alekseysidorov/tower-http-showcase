@@ -1,13 +1,13 @@
 use http::{header::USER_AGENT, HeaderValue};
 use log::info;
 use showcase_api::{model::HelloRequest, HelloService};
-use showcase_client::HttpClient;
+use showcase_client::{BoxedHttpClient, HelloClient};
 use structured_logger::{async_json::new_writer, Builder};
 use tower::{ServiceBuilder, ServiceExt as _};
 use tower_http::ServiceBuilderExt as _;
 use tower_http_client::adapters::reqwest::HttpClientLayer;
 
-fn make_client(client: reqwest::Client, node_address: String) -> HttpClient {
+fn make_client(client: reqwest::Client, node_address: String) -> HelloClient<BoxedHttpClient> {
     let service = ServiceBuilder::new()
         // Add some layers.
         .map_request(move |mut request: http::Request<_>| {
@@ -24,7 +24,7 @@ fn make_client(client: reqwest::Client, node_address: String) -> HttpClient {
         .layer(HttpClientLayer)
         .service(client)
         .map_err(eyre::Error::from);
-    HttpClient::new(tower::util::BoxCloneSyncService::new(service))
+    HelloClient::new(tower::util::BoxCloneSyncService::new(service))
 }
 
 #[tokio::main]
