@@ -1862,7 +1862,9 @@ checksum = "d039ad9159c98b70ecfd540b2573b97f7f52c3e8d9f8ad57a24b916a536975f9"
 dependencies = [
  "futures-core",
  "futures-util",
+ "indexmap",
  "pin-project-lite",
+ "slab",
  "sync_wrapper",
  "tokio",
  "tokio-util",
@@ -1888,9 +1890,9 @@ dependencies = [
 
 [[package]]
 name = "tower-http-client"
-version = "0.5.0-alpha.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53c0ab4acf5387d1430d7738eda11527f2832219cd2e2c6f87c12ef0613e5caf"
+checksum = "6af652802f752a778640335e63fcd315317f005a341da3b3826c976bff86ff87"
 dependencies = [
  "bytes",
  "futures-util",
@@ -1918,9 +1920,9 @@ checksum = "121c2a6cda46980bb0fcd1647ffaf6cd3fc79a013de288782836f6df9c48780e"
 
 [[package]]
 name = "tower-reqwest"
-version = "0.5.0-alpha.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8725a2d18f594c0b4e756822ce6181db50f9422282768a49aaf8aa3ef06bfffe"
+checksum = "865048fe73db5eb5476cd9a468ba808d3fe709398146931b40643e8063187e39"
 dependencies = [
  "bytes",
  "futures-util",

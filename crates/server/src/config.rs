@@ -20,8 +20,8 @@ pub struct ResponseDelays {
 impl Default for ResponseDelays {
     fn default() -> Self {
         Self {
-            min: Duration::from_millis(0),
-            max: Duration::from_millis(500),
+            min: Duration::from_millis(1),
+            max: Duration::from_millis(100),
         }
     }
 }

@@ -4,6 +4,8 @@ pub mod model;
 
 pub const DEFAULT_SERVER_PORT: u16 = 8080;
 
+pub const NODES_COUNT: u32 = 16;
+
 pub trait HelloService {
     type TransportError;
 

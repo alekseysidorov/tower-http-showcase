@@ -2,7 +2,7 @@ use showcase_api::{
     model::{HelloRequest, HelloResponse},
     HelloService,
 };
-use tower::Service;
+use tower::{BoxError, Service};
 use tower_http_client::{ResponseExt as _, ServiceExt as _};
 
 /// Implementation agnostic HTTP client.
@@ -26,7 +26,7 @@ where
     S: Service<
         http::Request<reqwest::Body>,
         Response = http::Response<reqwest::Body>,
-        Error = eyre::Error,
+        Error = BoxError,
     >,
     S::Future: Send + 'static,
 {

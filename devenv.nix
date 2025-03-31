@@ -21,8 +21,7 @@
   env.SHOWCASE_SERVER_PORT = "8080";
 
   scripts = {
-    ci-lints.exec = "cargo clippy";
-    ci-tests.exec = "cargo nextest run";
+    lints.exec = "cargo clippy";
   };
 
   processes = {
