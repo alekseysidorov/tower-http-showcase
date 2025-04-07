@@ -17,7 +17,7 @@ axum = "0.8"
 eyre = "0.6.12"
 future-local-storage = "0.1.2"
 headers = "0.4"
-http = "1"
+http = "1.3"
 humantime-serde = "1.1.1"
 log = { version = "0.4.27", features = ["kv_serde"] }
 rand = "0.9"
@@ -33,4 +33,4 @@ tower = { version = "0.5.2", features = [
   "balance",
 ] }
 tower-http = { version = "0.6.2" }
-tower-http-client = "0.5.0"
+tower-http-client = "0.5.2"
