@@ -1,9 +1,9 @@
 use std::convert::Infallible;
 
-use axum::{extract::MatchedPath, Router};
+use axum::{Router, extract::MatchedPath};
 use headers::HeaderMapExt as _;
 use serde::Serialize;
-use tower::{service_fn, Service, ServiceBuilder};
+use tower::{Service, ServiceBuilder, service_fn};
 
 #[derive(Debug, Serialize)]
 struct ResponseInfo {

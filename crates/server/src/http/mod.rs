@@ -1,4 +1,4 @@
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 
 use crate::state::SharedAppState;
 
@@ -9,7 +9,7 @@ pub fn make_router(state: SharedAppState) -> Router {
 }
 
 mod routes {
-    use axum::{extract::State, http::StatusCode, Json};
+    use axum::{Json, extract::State, http::StatusCode};
     use showcase_api::model::{HelloRequest, HelloResponse};
 
     use crate::state::{HelloService, SharedAppState};

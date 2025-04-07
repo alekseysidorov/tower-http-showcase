@@ -1,14 +1,15 @@
 use std::time::Duration;
 
-use http::{header::USER_AGENT, HeaderValue};
-use log::info;
-use showcase_api::{model::HelloRequest, HelloService, NODES_COUNT};
+use futures_util::StreamExt as _;
+use http::{HeaderValue, header::USER_AGENT};
+use log::{error, info};
+use showcase_api::{HelloService, NODES_COUNT, model::HelloRequest};
 use showcase_client::{BoxedHttpClient, HelloClient};
-use structured_logger::{async_json::new_writer, Builder};
+use structured_logger::{Builder, async_json::new_writer};
 use tower::{
+    BoxError, ServiceBuilder, ServiceExt as _,
     balance::p2c::Balance,
     load::{CompleteOnResponse, PeakEwma},
-    BoxError, ServiceBuilder, ServiceExt as _,
 };
 use tower_http::ServiceBuilderExt as _;
 use tower_http_client::adapters::reqwest::HttpClientLayer;
@@ -43,7 +44,7 @@ async fn main() -> Result<(), BoxError> {
 
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
     let inner_client = ServiceBuilder::new()
-        .buffer(512)
+        .buffer(256)
         .concurrency_limit(16)
         .service(Balance::new(tower::discover::ServiceList::new(
             (0..NODES_COUNT).map(move |node_id| {
@@ -59,39 +60,36 @@ async fn main() -> Result<(), BoxError> {
             }),
         )));
 
-    let mut hello_client = HelloClient::new(inner_client);
-
-    for _ in 0..512 {
-        let response = hello_client
-            .say_hello(HelloRequest {
-                name: "Alice".to_string(),
-            })
-            .await?;
-        info!(
-            response:serde;
-            "Received response"
-        );
-    }
-
-    // for node_id in 0..16 {
-    //     let node_address = format!("{server_address}/node/{node_id}");
-    //     let mut hello_client = make_client(reqwest::Client::new(), node_address.clone());
-
-    //     info!(
-    //         node_address;
-    //         "Sending simple hello request"
-    //     );
-
-    //     let response = hello_client
-    //         .say_hello(HelloRequest {
-    //             name: "Alice".to_string(),
-    //         })
-    //         .await?;
-    //     info!(
-    //         response:serde, node_id;
-    //         "Received response"
-    //     );
-    // }
+    let hello_client = HelloClient::new(inner_client);
+    futures_util::stream::iter(0..2048)
+        .map({
+            let hello_client = hello_client.clone();
+            move |_| {
+                let mut hello_client = hello_client.clone();
+                async move {
+                    hello_client
+                        .say_hello(HelloRequest {
+                            name: "Alice".to_string(),
+                        })
+                        .await
+                }
+            }
+        })
+        .for_each_concurrent(16, async |result| match result.await {
+            Ok(response) => {
+                info!(
+                    response:serde;
+                    "Received response"
+                );
+            }
+            Err(err) => {
+                error!(
+                    err:?;
+                    "Failed to receive response"
+                );
+            }
+        })
+        .await;
 
     Ok(())
 }

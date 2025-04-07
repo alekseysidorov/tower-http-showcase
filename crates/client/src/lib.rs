@@ -1,6 +1,6 @@
 use showcase_api::{
-    model::{HelloRequest, HelloResponse},
     HelloService,
+    model::{HelloRequest, HelloResponse},
 };
 use tower::{BoxError, Service};
 use tower_http_client::{ResponseExt as _, ServiceExt as _};
@@ -24,10 +24,10 @@ impl<S> HelloClient<S> {
 impl<S> HelloService for HelloClient<S>
 where
     S: Service<
-        http::Request<reqwest::Body>,
-        Response = http::Response<reqwest::Body>,
-        Error = BoxError,
-    >,
+            http::Request<reqwest::Body>,
+            Response = http::Response<reqwest::Body>,
+            Error = BoxError,
+        >,
     S::Future: Send + 'static,
 {
     type TransportError = S::Error;

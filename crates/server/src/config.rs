@@ -21,7 +21,7 @@ impl Default for ResponseDelays {
     fn default() -> Self {
         Self {
             min: Duration::from_millis(1),
-            max: Duration::from_millis(100),
+            max: Duration::from_millis(250),
         }
     }
 }

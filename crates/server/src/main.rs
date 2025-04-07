@@ -1,13 +1,13 @@
 use std::time::Duration;
 
-use axum::{error_handling::HandleErrorLayer, http::StatusCode, BoxError, Router};
+use axum::{BoxError, Router, error_handling::HandleErrorLayer, http::StatusCode};
 use log::info;
 use showcase_api::NODES_COUNT;
 use showcase_server::{
     config::AppConfig, delay_iter::DelayIter, http::make_router, middlewares::attach_middlewares,
     state::AppState,
 };
-use structured_logger::{async_json::new_writer, Builder};
+use structured_logger::{Builder, async_json::new_writer};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
