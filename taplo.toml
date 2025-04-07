@@ -1,0 +1,37 @@
+include = ["**/*.toml"]
+
+[formatting]
+
+[[rule]]
+
+[rule.formatting]
+include = ["taplo.toml"]
+keys = ["exclude"]
+
+array_auto_collapse = false
+
+[[rule]]
+
+[rule.formatting]
+include = ["**/Cargo.toml"]
+
+[[rule]]
+
+[rule.formatting]
+align_entries = false
+
+[[rule]]
+include = ["**/Cargo.toml"]
+keys = ["dependencies", "*-dependencies", "workspace", "workspace.dependencies"]
+
+[rule.formatting]
+reorder_keys = true
+align_comments = false
+
+[[rule]]
+include = ["**/Cargo.toml"]
+keys = ["package", "workspace.package"]
+
+[rule.formatting]
+reorder_keys = false
+align_comments = true
