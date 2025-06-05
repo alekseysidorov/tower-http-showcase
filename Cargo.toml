@@ -11,9 +11,10 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 
 [workspace.dependencies]
-showcase-api = { path = "crates/api", version = "0.0.0" }
+showcase-api = { version = "0.0.0", path = "crates/api" }
 
 axum = "0.8"
+context-logger = "0.1"
 eyre = "0.6.12"
 futures-util = "0.3.31"
 headers = "0.4"
@@ -24,7 +25,7 @@ rand = "0.9"
 reqwest = "0.12"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-structured-logger = "1.0.3"
+structured-logger = "1.0"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.2", features = [
   "limit",
@@ -32,5 +33,5 @@ tower = { version = "0.5.2", features = [
   "discover",
   "balance",
 ] }
-tower-http = { version = "0.6.2" }
-tower-http-client = "0.5.2"
+tower-http = { version = "0.6" }
+tower-http-client = "0.5"

@@ -45,8 +45,10 @@ pub fn attach_middlewares(router: Router) -> Router {
                             duration_ms: elapsed.as_secs_f64() * 1000.0,
                             status_code: response.status().as_u16(),
                         };
+
                         log::info!(
-                            request:serde, response:serde;
+                            request:serde,
+                            response:serde;
                             "Request handled"
                         );
                     }
