@@ -1,7 +1,8 @@
 use std::time::Duration;
 
 use axum::{BoxError, Router, error_handling::HandleErrorLayer, http::StatusCode};
-use log::info;
+use context_logger::ContextLogger;
+use log::{LevelFilter, info};
 use showcase_api::NODES_COUNT;
 use showcase_server::{
     config::AppConfig, delay_iter::DelayIter, http::make_router, middlewares::attach_middlewares,
@@ -13,9 +14,13 @@ use tower::ServiceBuilder;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
-    Builder::with_level("info")
-        .with_target_writer("*", new_writer(tokio::io::stdout()))
-        .init();
+    let level = LevelFilter::Info;
+    ContextLogger::new(
+        Builder::with_level(level.as_str())
+            .with_target_writer("*", new_writer(tokio::io::stdout()))
+            .build(),
+    )
+    .init(level);
 
     let config = AppConfig::default();
     let service = {

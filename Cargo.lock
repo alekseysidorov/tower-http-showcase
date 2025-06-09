@@ -147,6 +147,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "context-logger"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b2c5039dc14478e0e05d5f7be142615a2ba1a93556a2cbe7bccdaa21ab484e4"
+dependencies = [
+ "erased-serde",
+ "include-utils",
+ "log",
+ "pin-project",
+ "serde",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1367,9 +1380,13 @@ dependencies = [
 name = "showcase-client"
 version = "0.0.0"
 dependencies = [
+ "bytes",
+ "context-logger",
  "eyre",
  "futures-util",
  "http",
+ "http-body",
+ "http-body-util",
  "log",
  "reqwest",
  "showcase-api",
@@ -1385,8 +1402,10 @@ name = "showcase-server"
 version = "0.0.0"
 dependencies = [
  "axum",
+ "context-logger",
  "eyre",
  "headers",
+ "http-body-util",
  "humantime-serde",
  "log",
  "rand",

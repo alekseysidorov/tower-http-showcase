@@ -4,13 +4,13 @@ pub mod model;
 
 pub const DEFAULT_SERVER_PORT: u16 = 8080;
 
-pub const NODES_COUNT: u32 = 16;
+pub const NODES_COUNT: u32 = 1;
 
 pub trait HelloService {
     type TransportError;
 
     fn say_hello(
-        &mut self,
+        &self,
         request: model::HelloRequest,
     ) -> impl Future<Output = Result<model::HelloResponse, Self::TransportError>>;
 }

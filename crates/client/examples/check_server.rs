@@ -1,21 +1,24 @@
 use std::time::Duration;
 
+use context_logger::ContextLogger;
 use futures_util::StreamExt as _;
 use http::{HeaderValue, header::USER_AGENT};
-use log::{error, info};
+use http_body_util::BodyExt as _;
+use log::{LevelFilter, error, info};
 use showcase_api::{HelloService, NODES_COUNT, model::HelloRequest};
 use showcase_client::{BoxedHttpClient, HelloClient};
 use structured_logger::{Builder, async_json::new_writer};
 use tower::{
-    BoxError, ServiceBuilder, ServiceExt as _,
+    BoxError, ServiceBuilder,
     balance::p2c::Balance,
     load::{CompleteOnResponse, PeakEwma},
 };
 use tower_http::ServiceBuilderExt as _;
-use tower_http_client::adapters::reqwest::HttpClientLayer;
+use tower_http_client::adapters::reqwest::{HttpClientLayer, into_reqwest_body};
 
-fn make_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
-    let service = ServiceBuilder::new()
+fn make_tower_http_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
+    ServiceBuilder::new()
+        .layer_fn(BoxedHttpClient::new)
         // Add some layers.
         .map_request(move |mut request: http::Request<_>| {
             // Add node address to the request URI, since the underlying client relies on it.
@@ -23,33 +26,37 @@ fn make_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient
                 .concat()
                 .parse()
                 .unwrap();
-
             info!(node_address; "Sending request to node");
-
             request
         })
         .override_request_header(USER_AGENT, HeaderValue::from_static("tower-http-client"))
         // Make client compatible with the `tower-http` layers.
+        .map_err(BoxError::from)
+        .map_response_body(|body: reqwest::Body| body.map_err(BoxError::from).boxed())
+        .map_request_body(into_reqwest_body)
         .layer(HttpClientLayer)
         .service(client)
-        .map_err(eyre::Error::from);
-    tower::util::BoxCloneSyncService::new(service)
 }
 
 #[tokio::main]
 async fn main() -> Result<(), BoxError> {
-    Builder::with_level("info")
-        .with_target_writer("*", new_writer(tokio::io::stdout()))
-        .init();
+    let level = LevelFilter::Info;
+    ContextLogger::new(
+        Builder::with_level(level.as_str())
+            .with_target_writer("*", new_writer(tokio::io::stdout()))
+            .build(),
+    )
+    .init(level);
 
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
+
     let inner_client = ServiceBuilder::new()
         .buffer(256)
         .concurrency_limit(16)
         .service(Balance::new(tower::discover::ServiceList::new(
             (0..NODES_COUNT).map(move |node_id| {
                 let node_address = format!("{server_address}/node/{node_id}");
-                let inner = make_client(reqwest::Client::new(), node_address.clone());
+                let inner = make_tower_http_client(reqwest::Client::new(), node_address.clone());
                 PeakEwma::new(
                     inner,
                     Duration::from_millis(10),
@@ -65,7 +72,7 @@ async fn main() -> Result<(), BoxError> {
         .map({
             let hello_client = hello_client.clone();
             move |_| {
-                let mut hello_client = hello_client.clone();
+                let hello_client = hello_client.clone();
                 async move {
                     hello_client
                         .say_hello(HelloRequest {

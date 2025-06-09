@@ -19,6 +19,7 @@ mod routes {
         Json(request): Json<HelloRequest>,
     ) -> Result<Json<HelloResponse>, StatusCode> {
         let message = state.hello_service().say_hello(&request.name).await;
+        log::debug!("Hello world called");
         Ok(Json(HelloResponse { message }))
     }
 }

@@ -12,8 +12,10 @@ publish = false
 showcase-api = { workspace = true }
 
 axum = { workspace = true }
+context-logger = { workspace = true }
 eyre = { workspace = true }
 headers = { workspace = true }
+http-body-util = { workspace = true }
 humantime-serde = { workspace = true }
 log = { workspace = true }
 rand = { workspace = true }

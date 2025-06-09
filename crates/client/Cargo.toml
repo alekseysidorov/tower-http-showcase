@@ -11,14 +11,23 @@ publish = false
 [dependencies]
 showcase-api = { workspace = true }
 
+bytes = { workspace = true }
+context-logger = { workspace = true }
 eyre = { workspace = true }
 http = { workspace = true }
+http-body = { workspace = true }
+http-body-util = { workspace = true }
 log = { workspace = true }
 reqwest = { workspace = true }
 structured-logger = { workspace = true }
 tokio = { workspace = true }
-tower = { workspace = true }
-tower-http = { workspace = true, features = ["set-header", "util"] }
+tower = { workspace = true, features = ["util"] }
+tower-http = { workspace = true, features = [
+  "set-header",
+  "util",
+  "map-request-body",
+  "map-response-body",
+] }
 tower-http-client = { workspace = true }
 
 [dev-dependencies]
