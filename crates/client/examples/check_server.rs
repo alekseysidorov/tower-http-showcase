@@ -1,6 +1,9 @@
 use std::time::Duration;
 
 use context_logger::ContextLogger;
+use fastrace::collector::{Config, ConsoleReporter};
+use fastrace_jaeger::JaegerReporter;
+use fastrace_tower::FastraceClientLayer;
 use futures_util::StreamExt as _;
 use http::{HeaderValue, header::USER_AGENT};
 use http_body_util::BodyExt as _;
@@ -19,6 +22,7 @@ use tower_http_client::adapters::reqwest::{HttpClientLayer, into_reqwest_body};
 fn make_tower_http_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
     ServiceBuilder::new()
         .layer_fn(BoxedHttpClient::new)
+        .layer(FastraceClientLayer)
         // Add some layers.
         .map_request(move |mut request: http::Request<_>| {
             // Add node address to the request URI, since the underlying client relies on it.
@@ -47,6 +51,10 @@ async fn main() -> Result<(), BoxError> {
             .build(),
     )
     .init(level);
+
+    // Initialize fastrace reporter.
+    let reporter = JaegerReporter::new("127.0.0.1:6831".parse()?, "tower-http-showcase-client")?;
+    fastrace::set_reporter(reporter, Config::default());
 
     let server_address = format!("http://localhost:{}", showcase_api::DEFAULT_SERVER_PORT);
 
@@ -98,5 +106,6 @@ async fn main() -> Result<(), BoxError> {
         })
         .await;
 
+    fastrace::flush();
     Ok(())
 }

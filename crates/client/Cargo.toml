@@ -14,6 +14,9 @@ showcase-api = { workspace = true }
 bytes = { workspace = true }
 context-logger = { workspace = true }
 eyre = { workspace = true }
+fastrace = { workspace = true }
+fastrace-jaeger = { workspace = true }
+fastrace-tower = { workspace = true }
 http = { workspace = true }
 http-body = { workspace = true }
 http-body-util = { workspace = true }

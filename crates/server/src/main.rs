@@ -2,6 +2,11 @@ use std::time::Duration;
 
 use axum::{BoxError, Router, error_handling::HandleErrorLayer, http::StatusCode};
 use context_logger::ContextLogger;
+use eyre::eyre;
+use fastrace::collector::{Config, ConsoleReporter};
+use fastrace::prelude::*;
+use fastrace_jaeger::JaegerReporter;
+use fastrace_tower::FastraceServerLayer;
 use log::{LevelFilter, info};
 use showcase_api::NODES_COUNT;
 use showcase_server::{
@@ -22,6 +27,11 @@ async fn main() -> eyre::Result<()> {
     )
     .init(level);
 
+    // Initialize fastrace reporter.
+    let reporter = JaegerReporter::new("127.0.0.1:6831".parse()?, "tower-http-showcase-server")
+        .map_err(|err| eyre!("{err}"))?;
+    fastrace::set_reporter(reporter, Config::default());
+
     let config = AppConfig::default();
     let service = {
         let mut router = Router::new();
@@ -36,6 +46,7 @@ async fn main() -> eyre::Result<()> {
                 &format!("/node/{node_id}"),
                 make_router(state.into()).layer(
                     ServiceBuilder::new()
+                        .layer(FastraceServerLayer)
                         .layer(HandleErrorLayer::new(|err: BoxError| async move {
                             (StatusCode::INTERNAL_SERVER_ERROR, format!("`{err}"))
                         }))
@@ -58,5 +69,6 @@ async fn main() -> eyre::Result<()> {
 
     axum::serve(listener, service).await?;
 
+    fastrace::flush();
     Ok(())
 }

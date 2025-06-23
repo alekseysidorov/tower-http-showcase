@@ -14,12 +14,14 @@ mod routes {
 
     use crate::state::{HelloService, SharedAppState};
 
+    #[fastrace::trace]
     pub async fn hello_world(
         State(state): State<SharedAppState>,
         Json(request): Json<HelloRequest>,
     ) -> Result<Json<HelloResponse>, StatusCode> {
         let message = state.hello_service().say_hello(&request.name).await;
         log::debug!("Hello world called");
+        fastrace::flush();
         Ok(Json(HelloResponse { message }))
     }
 }

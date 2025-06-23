@@ -38,6 +38,7 @@ where
 {
     type TransportError = S::Error;
 
+    #[fastrace::trace]
     async fn say_hello(
         &self,
         request: HelloRequest,
