@@ -19,6 +19,9 @@ use tower::ServiceBuilder;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
+    // Something is wrong with the opentelemetry exporter, so we need to wait a bit before initializing the logger.
+    tokio::time::sleep(Duration::from_secs(1)).await;
+
     let level = LevelFilter::Info;
     ContextLogger::new(
         Builder::with_level(level.as_str())
