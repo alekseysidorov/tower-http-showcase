@@ -31,13 +31,15 @@ pub fn attach_middlewares(router: Router) -> Router {
                     .get::<MatchedPath>()
                     .map(|x| x.as_str().to_owned());
 
-                let context = LogContext::new().record(
-                    "request",
-                    ContextValue::serde(RequestInfo {
-                        user_agent,
-                        matched_path,
-                    }),
-                );
+                let context = LogContext::new()
+                    .record(
+                        "request",
+                        ContextValue::serde(RequestInfo {
+                            user_agent,
+                            matched_path,
+                        }),
+                    )
+                    .record("headers", ContextValue::debug(req.headers().clone()));
 
                 let fut = service.call(req);
                 async move {

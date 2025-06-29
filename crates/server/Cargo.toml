@@ -15,7 +15,6 @@ axum = { workspace = true }
 context-logger = { workspace = true }
 eyre = { workspace = true }
 fastrace = { workspace = true }
-fastrace-jaeger = { workspace = true }
 fastrace-tower = { workspace = true }
 headers = { workspace = true }
 http-body-util = { workspace = true }
@@ -26,3 +25,8 @@ serde = { workspace = true }
 structured-logger = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }
+
+fastrace-opentelemetry = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { workspace = true }

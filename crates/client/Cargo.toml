@@ -15,7 +15,6 @@ bytes = { workspace = true }
 context-logger = { workspace = true }
 eyre = { workspace = true }
 fastrace = { workspace = true }
-fastrace-jaeger = { workspace = true }
 fastrace-tower = { workspace = true }
 http = { workspace = true }
 http-body = { workspace = true }
@@ -32,6 +31,12 @@ tower-http = { workspace = true, features = [
   "map-response-body",
 ] }
 tower-http-client = { workspace = true }
+
+fastrace-opentelemetry = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+
 
 [dev-dependencies]
 futures-util.workspace = true

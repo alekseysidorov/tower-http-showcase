@@ -1,10 +1,10 @@
-use axum::{Router, routing::get};
+use axum::{Router, routing::post};
 
 use crate::state::SharedAppState;
 
 pub fn make_router(state: SharedAppState) -> Router {
     Router::new()
-        .route("/hello", get(routes::hello_world))
+        .route("/hello", post(routes::hello_world))
         .with_state(state)
 }
 
@@ -21,7 +21,6 @@ mod routes {
     ) -> Result<Json<HelloResponse>, StatusCode> {
         let message = state.hello_service().say_hello(&request.name).await;
         log::debug!("Hello world called");
-        fastrace::flush();
         Ok(Json(HelloResponse { message }))
     }
 }

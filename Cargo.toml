@@ -18,7 +18,6 @@ bytes = "1"
 context-logger = "0.1"
 eyre = "0.6.12"
 fastrace = { version = "0.7", features = ["enable"] }
-fastrace-jaeger = "0.7"
 fastrace-tower = "0.1"
 futures-util = "0.3.31"
 headers = "0.4"
@@ -41,3 +40,15 @@ tower = { version = "0.5.2", features = [
 ] }
 tower-http = { version = "0.6" }
 tower-http-client = "0.5"
+
+fastrace-opentelemetry = "0.12"
+opentelemetry = { version = "0.30.0", default-features = false, features = [
+  "trace",
+] }
+opentelemetry-otlp = { version = "0.30.0", default-features = false, features = [
+  "trace",
+  "grpc-tonic",
+] }
+opentelemetry_sdk = { version = "0.30.0", default-features = false, features = [
+  "trace",
+] }

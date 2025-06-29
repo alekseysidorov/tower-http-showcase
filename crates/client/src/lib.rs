@@ -1,4 +1,5 @@
 use bytes::Bytes;
+use fastrace::local::LocalSpan;
 use http_body::Body;
 use http_body_util::combinators::BoxBody;
 use showcase_api::{
@@ -38,15 +39,17 @@ where
 {
     type TransportError = S::Error;
 
-    #[fastrace::trace]
+    #[fastrace::trace(short_name = true)]
     async fn say_hello(
         &self,
         request: HelloRequest,
     ) -> Result<HelloResponse, Self::TransportError> {
+        LocalSpan::add_property(|| ("request.name", request.name.clone()));
+
         let mut service = self.0.clone();
         service.ready().await?;
 
-        let response = service.get("/hello").json(&request)?.send().await?;
+        let response = service.post("/hello").json(&request)?.send().await?;
         let body = response.body_reader().json::<HelloResponse>().await?;
 
         Ok(body)
