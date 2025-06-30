@@ -20,7 +20,7 @@ use tower::{
 use tower_http::ServiceBuilderExt as _;
 use tower_http_client::adapters::reqwest::{HttpClientLayer, into_reqwest_body};
 
-const TOTAL_REQUESTS: usize = 1024;
+const TOTAL_REQUESTS: usize = 16 * 1024;
 
 fn make_tower_http_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
     ServiceBuilder::new()

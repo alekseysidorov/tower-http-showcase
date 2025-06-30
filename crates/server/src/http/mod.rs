@@ -14,7 +14,7 @@ mod routes {
 
     use crate::state::{HelloService, SharedAppState};
 
-    #[fastrace::trace]
+    #[fastrace::trace(short_name = true)]
     pub async fn hello_world(
         State(state): State<SharedAppState>,
         Json(request): Json<HelloRequest>,

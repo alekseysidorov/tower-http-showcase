@@ -70,11 +70,8 @@ async fn main() -> eyre::Result<()> {
         let mut router = Router::new();
 
         for node_id in 0..NODES_COUNT {
-            let delay_iter = DelayIter::new(
-                node_id,
-                config.response_delays.min..config.response_delays.max,
-            );
-            let state = AppState::new(delay_iter);
+            let delay_iter = DelayIter::new(config.response_delays.min..config.response_delays.max);
+            let state = AppState::new(node_id, delay_iter);
             router = router.nest(
                 &format!("/node/{node_id}"),
                 make_router(state.into()).layer(
