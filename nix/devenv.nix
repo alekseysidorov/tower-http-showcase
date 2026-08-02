@@ -5,6 +5,11 @@
     channel = "stable";
   };
 
+  packages = with pkgs; [
+    tombi
+    marksman
+  ];
+
   git-hooks = {
     package = pkgs.prek;
     hooks = {
