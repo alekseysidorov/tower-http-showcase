@@ -2,8 +2,8 @@ use showcase_api::{
     HelloService,
     model::{HelloRequest, HelloResponse},
 };
-use tower::{BoxError, ServiceBuilder};
-use tower_http_client::rewrite_uri::RewriteUriLayer;
+use showcase_client::BoxedHttpClient;
+use tower::ServiceBuilder;
 use tower_reqwest::HttpClientLayer;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -14,7 +14,7 @@ use wiremock::{
 async fn hello_client_sends_json_and_deserializes_response() {
     let mock_server = MockServer::start().await;
     Mock::given(method("GET"))
-        .and(path("/hello"))
+        .and(path("/node/7/hello"))
         .and(body_json(serde_json::json!({ "name": "Ada" })))
         .respond_with(ResponseTemplate::new(200).set_body_json(HelloResponse {
             message: "Hello, Ada!".to_owned(),
@@ -23,18 +23,11 @@ async fn hello_client_sends_json_and_deserializes_response() {
         .mount(&mock_server)
         .await;
 
-    let base_uri = mock_server.uri();
     let service = ServiceBuilder::new()
-        .layer(RewriteUriLayer::new(move |uri: &http::Uri| {
-            let path_and_query = uri.path_and_query().map_or("/", |value| value.as_str());
-            format!("{base_uri}{path_and_query}")
-                .parse::<http::Uri>()
-                .map_err(BoxError::from)
-        }))
-        .map_err(BoxError::from)
         .layer(HttpClientLayer)
         .service(reqwest::Client::new());
-    let mut client = showcase_client::HelloClient::new(service);
+    let origin = format!("{}/node/7", mock_server.uri()).parse().unwrap();
+    let mut client = BoxedHttpClient::with_origin(service, origin).unwrap();
 
     let response = client
         .say_hello(HelloRequest {
