@@ -9,7 +9,7 @@ use tower_http_client::{ResponseExt as _, ServiceExt as _};
 pub type BoxedHttpClient = tower::util::BoxCloneSyncService<
     http::Request<reqwest::Body>,
     http::Response<reqwest::Body>,
-    eyre::Error,
+    BoxError,
 >;
 
 #[derive(Clone, Debug)]

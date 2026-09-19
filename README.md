@@ -40,15 +40,16 @@ devenv shell cargo run -p showcase-renderer -- \
 
 ## Tests
 
-Unit tests and Wiremock-backed client tests run with:
+Run the complete configured check and test graph with:
 
 ```sh
 devenv tasks run tests
 ```
 
-The task namespace includes unit tests, Wiremock-backed HTTP client tests, a
-worker HTTP smoke test, and a renderer HTTP task that produces a PNG using a
-real Tokio worker. Run only the renderer task with:
+This task graph runs formatting, Clippy, workspace checks and tests (including
+Wiremock), then starts the test worker, waits for its `/health` probe, and
+exercises both its HTTP API and PNG renderer. Devenv stops the worker when the
+task graph finishes. To run just the renderer integration task and its dependencies:
 
 ```sh
 devenv tasks run tests:renderer-http

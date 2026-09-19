@@ -10,7 +10,6 @@ publish = false
 [dependencies]
 showcase-api = { workspace = true }
 
-eyre = { workspace = true }
 http = { workspace = true }
 log = { workspace = true }
 reqwest = { workspace = true }

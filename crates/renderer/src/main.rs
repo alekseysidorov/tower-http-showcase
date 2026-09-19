@@ -95,7 +95,12 @@ async fn request_tile(
     client: &mut WorkerClient,
     tile: showcase_renderer::TilePlan,
 ) -> eyre::Result<RenderTileResponse> {
-    let response = client.post("/render").json(&tile.request)?.send().await?;
+    let response = client
+        .post("/render")
+        .json(&tile.request)?
+        .send()
+        .await
+        .map_err(eyre::Report::msg)?;
     Ok(response.body_reader().json().await?)
 }
 

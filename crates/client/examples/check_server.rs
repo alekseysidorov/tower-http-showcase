@@ -7,7 +7,7 @@ use showcase_api::{HelloService, NODES_COUNT, model::HelloRequest};
 use showcase_client::{BoxedHttpClient, HelloClient};
 use structured_logger::{Builder, async_json::new_writer};
 use tower::{
-    BoxError, ServiceBuilder, ServiceExt as _,
+    BoxError, ServiceBuilder,
     balance::p2c::Balance,
     load::{CompleteOnResponse, PeakEwma},
 };
@@ -27,14 +27,13 @@ fn make_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient
         }))
         .map_err(BoxError::from)
         .map_request(move |request: http::Request<_>| {
-            info!(node_address: log_node_address; "Sending request to node");
+            info!(node_address = log_node_address; "Sending request to node");
             request
         })
         .override_request_header(USER_AGENT, HeaderValue::from_static("tower-http-client"))
         // Make client compatible with the `tower-http` layers.
         .layer(HttpClientLayer)
-        .service(client)
-        .map_err(eyre::Error::from);
+        .service(client);
     tower::util::BoxCloneSyncService::new(service)
 }
 
