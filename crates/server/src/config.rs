@@ -1,5 +1,4 @@
-use std::time::Duration;
-use std::{env, net::SocketAddr, str::FromStr};
+use std::{env, net::SocketAddr, str::FromStr, time::Duration};
 
 use eyre::WrapErr as _;
 use serde::{Deserialize, Serialize};

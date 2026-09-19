@@ -14,12 +14,13 @@ pub fn make_router(state: SharedAppState) -> Router {
 }
 
 mod routes {
+    use std::time::Instant;
+
     use axum::{Json, extract::State, http::StatusCode};
     use fractal_core::{TileSpec, render_tile as render};
     use showcase_api::model::{
         HelloRequest, HelloResponse, RenderTileRequest, RenderTileResponse, RuntimeKind,
     };
-    use std::time::Instant;
 
     use crate::state::{HelloService, SharedAppState};
 
@@ -76,9 +77,8 @@ mod tests {
     use showcase_api::model::{RenderTileResponse, RuntimeKind};
     use tower::ServiceExt as _;
 
-    use crate::{delay_iter::DelayIter, state::AppState};
-
     use super::make_router;
+    use crate::{delay_iter::DelayIter, state::AppState};
 
     #[tokio::test]
     async fn render_route_returns_a_valid_tile_response() {

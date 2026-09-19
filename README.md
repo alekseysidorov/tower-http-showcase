@@ -54,3 +54,9 @@ task graph finishes. To run just the renderer integration task and its dependenc
 ```sh
 devenv tasks run tests:renderer-http
 ```
+
+Format Rust code with the shared workspace style using:
+
+```sh
+devenv tasks run format:rust
+```

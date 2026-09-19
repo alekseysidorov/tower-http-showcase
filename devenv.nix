@@ -2,6 +2,14 @@
 let
   testWorkerPort = config.processes.test-worker.ports.http.value;
   testWorkerUrl = "http://127.0.0.1:${toString testWorkerPort}";
+  # Pass unstable style settings on the CLI so stable Rustfmt applies them
+  # without requiring rustfmt.toml or a nightly toolchain.
+  rustfmtArgs = builtins.concatStringsSep " " [
+    "--config group_imports=StdExternalCrate"
+    "--config imports_granularity=Crate"
+    "--config comment_width=100"
+    "--config wrap_comments=true"
+  ];
 in
 {
   languages.rust = {
@@ -14,12 +22,17 @@ in
     pkgs.jq
   ];
 
+  tasks."format:rust" = {
+    description = "Format Rust code using the workspace style";
+    exec = "cargo fmt --all -- ${rustfmtArgs}";
+  };
+
   # Keep Cargo commands in one task so they share the build cache without
   # competing for Cargo's target-directory lock.
   tasks."checks:rust" = {
     description = "Run formatting, Clippy, and workspace checks";
     exec = ''
-      cargo fmt --all -- --check
+      cargo fmt --all -- ${rustfmtArgs} --check
       cargo clippy --workspace --all-targets -- -D warnings
       cargo check --workspace
       cargo build -p showcase-server -p showcase-renderer
