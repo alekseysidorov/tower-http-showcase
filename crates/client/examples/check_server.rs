@@ -12,20 +12,22 @@ use tower::{
     load::{CompleteOnResponse, PeakEwma},
 };
 use tower_http::ServiceBuilderExt as _;
+use tower_http_client::rewrite_uri::RewriteUriLayer;
 use tower_reqwest::HttpClientLayer;
 
 fn make_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
+    let log_node_address = node_address.clone();
     let service = ServiceBuilder::new()
-        // Add some layers.
-        .map_request(move |mut request: http::Request<_>| {
-            // Add node address to the request URI, since the underlying client relies on it.
-            *request.uri_mut() = [&node_address, request.uri().path()]
-                .concat()
-                .parse()
-                .unwrap();
-
-            info!(node_address; "Sending request to node");
-
+        // Resolve relative client URIs against this node's base URI.
+        .layer(RewriteUriLayer::new(move |uri: &http::Uri| {
+            let path_and_query = uri.path_and_query().map_or("/", |value| value.as_str());
+            format!("{node_address}{path_and_query}")
+                .parse::<http::Uri>()
+                .map_err(BoxError::from)
+        }))
+        .map_err(BoxError::from)
+        .map_request(move |request: http::Request<_>| {
+            info!(node_address: log_node_address; "Sending request to node");
             request
         })
         .override_request_header(USER_AGENT, HeaderValue::from_static("tower-http-client"))

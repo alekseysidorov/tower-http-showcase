@@ -1,9 +1,9 @@
-use http::Request;
 use showcase_api::{
     HelloService,
     model::{HelloRequest, HelloResponse},
 };
 use tower::{BoxError, ServiceBuilder};
+use tower_http_client::rewrite_uri::RewriteUriLayer;
 use tower_reqwest::HttpClientLayer;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -25,12 +25,12 @@ async fn hello_client_sends_json_and_deserializes_response() {
 
     let base_uri = mock_server.uri();
     let service = ServiceBuilder::new()
-        .map_request(move |mut request: Request<_>| {
-            *request.uri_mut() = format!("{base_uri}{}", request.uri().path())
-                .parse()
-                .unwrap();
-            request
-        })
+        .layer(RewriteUriLayer::new(move |uri: &http::Uri| {
+            let path_and_query = uri.path_and_query().map_or("/", |value| value.as_str());
+            format!("{base_uri}{path_and_query}")
+                .parse::<http::Uri>()
+                .map_err(BoxError::from)
+        }))
         .map_err(BoxError::from)
         .layer(HttpClientLayer)
         .service(reqwest::Client::new());
