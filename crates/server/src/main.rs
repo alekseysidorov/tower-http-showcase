@@ -1,8 +1,7 @@
 use std::time::Duration;
 
-use axum::{BoxError, Router, error_handling::HandleErrorLayer, http::StatusCode};
+use axum::{BoxError, error_handling::HandleErrorLayer, http::StatusCode};
 use log::info;
-use showcase_api::NODES_COUNT;
 use showcase_server::{
     config::AppConfig, delay_iter::DelayIter, http::make_router, middlewares::attach_middlewares,
     state::AppState,
@@ -17,13 +16,19 @@ async fn main() -> eyre::Result<()> {
         .with_target_writer("*", new_writer(tokio::io::stdout()))
         .init();
 
-    let config = AppConfig::default();
+    let config = AppConfig::from_env()?;
     let service = {
-        let mut router = Router::new();
+        let worker_state = AppState::with_worker(
+            DelayIter::new(0, config.response_delays.min..config.response_delays.max),
+            config.worker_id,
+            config.worker_delay,
+        )
+        .into();
+        let mut router = make_router(worker_state);
 
-        for node_id in 0..NODES_COUNT {
+        for node_id in 0..config.nodes_count {
             let delay_iter = DelayIter::new(
-                node_id,
+                node_id.into(),
                 config.response_delays.min..config.response_delays.max,
             );
             let state = AppState::new(delay_iter);
@@ -43,8 +48,7 @@ async fn main() -> eyre::Result<()> {
         attach_middlewares(router)
     };
 
-    let address = format!("0.0.0.0:{}", showcase_api::DEFAULT_SERVER_PORT);
-    let listener = TcpListener::bind(address).await?;
+    let listener = TcpListener::bind(config.listen_addr).await?;
 
     info!(
         server_address:? = listener.local_addr();

@@ -22,5 +22,8 @@ jobs:
       - name: Run linters
         run: devenv shell lints
 
-      - name: Build the devenv shell and run any pre-commit hooks
-        run: devenv test
+      - name: Check workspace
+        run: devenv shell cargo check --workspace
+
+      - name: Test workspace
+        run: devenv shell cargo test --workspace

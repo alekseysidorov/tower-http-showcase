@@ -12,7 +12,7 @@ use tower::{
     load::{CompleteOnResponse, PeakEwma},
 };
 use tower_http::ServiceBuilderExt as _;
-use tower_http_client::adapters::reqwest::HttpClientLayer;
+use tower_reqwest::HttpClientLayer;
 
 fn make_client(client: reqwest::Client, node_address: String) -> BoxedHttpClient {
     let service = ServiceBuilder::new()
