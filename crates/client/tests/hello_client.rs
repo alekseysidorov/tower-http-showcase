@@ -1,8 +1,5 @@
-use showcase_api::{
-    HelloService,
-    model::{HelloRequest, HelloResponse},
-};
-use showcase_client::BoxedHttpClient;
+use showcase_api::model::{HelloRequest, HelloResponse};
+use showcase_client::{HelloClient, with_origin};
 use tower::ServiceBuilder;
 use tower_reqwest::HttpClientLayer;
 use wiremock::{
@@ -27,7 +24,7 @@ async fn hello_client_sends_json_and_deserializes_response() {
         .layer(HttpClientLayer)
         .service(reqwest::Client::new());
     let origin = format!("{}/node/7", mock_server.uri()).parse().unwrap();
-    let mut client = BoxedHttpClient::with_origin(service, origin).unwrap();
+    let mut client = with_origin(service, origin).unwrap();
 
     let response = client
         .say_hello(HelloRequest {

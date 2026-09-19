@@ -3,18 +3,33 @@ use std::time::Duration;
 use futures_util::StreamExt as _;
 use http::{HeaderValue, Uri, header::USER_AGENT};
 use log::{error, info};
-use showcase_api::{HelloService, NODES_COUNT, model::HelloRequest};
-use showcase_client::BoxedHttpClient;
+use showcase_api::{NODES_COUNT, model::HelloRequest};
+use showcase_client::{BoxedHttpClient, HelloClient, with_origin};
 use structured_logger::{Builder, async_json::new_writer};
 use tower::{
-    BoxError, ServiceBuilder,
+    BoxError, Service, ServiceBuilder,
     balance::p2c::Balance,
     load::{CompleteOnResponse, PeakEwma},
+    util::BoxCloneSyncService,
 };
 use tower_http::ServiceBuilderExt as _;
 use tower_reqwest::HttpClientLayer;
 
-fn make_client(client: reqwest::Client, node_address: Uri) -> Result<BoxedHttpClient, BoxError> {
+fn make_client(
+    client: reqwest::Client,
+    node_address: Uri,
+) -> Result<
+    impl Service<
+        http::Request<reqwest::Body>,
+        Response = http::Response<reqwest::Body>,
+        Error = BoxError,
+        Future: Send,
+    > + Clone
+    + Send
+    + Sync
+    + 'static,
+    BoxError,
+> {
     let log_node_address = node_address.to_string();
     let service = ServiceBuilder::new()
         .map_request(move |request: http::Request<_>| {
@@ -25,7 +40,7 @@ fn make_client(client: reqwest::Client, node_address: Uri) -> Result<BoxedHttpCl
         // Make client compatible with the `tower-http` layers.
         .layer(HttpClientLayer)
         .service(client);
-    BoxedHttpClient::with_origin(service, node_address)
+    with_origin(service, node_address)
 }
 
 #[tokio::main]
@@ -53,7 +68,7 @@ async fn main() -> Result<(), BoxError> {
         .concurrency_limit(16)
         .service(Balance::new(tower::discover::ServiceList::new(nodes)));
 
-    let hello_client = BoxedHttpClient::from_service(inner_client);
+    let hello_client: BoxedHttpClient = BoxCloneSyncService::new(inner_client);
     futures_util::stream::iter(0..2048)
         .map({
             let hello_client = hello_client.clone();
