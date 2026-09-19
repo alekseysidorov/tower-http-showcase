@@ -1698,6 +1698,7 @@ name = "showcase-api"
 version = "0.0.0"
 dependencies = [
  "fractal-core",
+ "http",
  "serde",
  "serde_json",
 ]
@@ -1706,8 +1707,10 @@ dependencies = [
 name = "showcase-client"
 version = "0.0.0"
 dependencies = [
+ "bytes",
  "futures-util",
  "http",
+ "http-body-util",
  "log",
  "reqwest",
  "serde_json",

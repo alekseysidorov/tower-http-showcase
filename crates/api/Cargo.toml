@@ -10,4 +10,5 @@ publish = false
 [dependencies]
 fractal-core = { workspace = true }
 serde = { workspace = true }
+http = { workspace = true }
 serde_json = { workspace = true }

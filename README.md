@@ -1,9 +1,39 @@
 # tower-http-showcase
 
 A small distributed Mandelbrot rendering and tracing lab. It includes a
-deterministic tile renderer, a Tokio worker, and a renderer that assembles a PNG
-from tiles returned by one worker. Later milestones will connect rendering to
-the existing Tower load balancer, add Compio, and export distributed traces.
+deterministic tile renderer, Tokio workers, a Tower-balanced hello client, and a
+renderer that assembles a PNG from worker responses.
+
+## Tower HTTP client showcase
+
+The hello example demonstrates a typed remote API composed over Tower rather
+than a bespoke HTTP-client trait:
+
+```text
+HelloService -> HelloClient<S> -> Tower middleware -> reqwest adapter
+```
+
+`HelloService` describes the domain operation; `HelloClient<S>` adapts it to an
+arbitrary normalized Tower service. Service failures stay as `S::Error`, while
+non-success HTTP responses and malformed response bodies are represented as
+separate API/protocol errors. The transport adapter converts replayable
+`Full<Bytes>` request bodies to `reqwest::Body` and erases response bodies to
+`BoxBody`, so concrete reqwest body types do not leak into the client API.
+
+The runnable client composes retry, per-node URI rewriting, request headers,
+logging, `PeakEwma` balancing, buffering, and concurrency limiting. The node
+base path is applied by the dedicated `RewriteUriLayer`; the final service stack
+is boxed only after composition so the balancer can hold one service type.
+
+Run it while the showcase server is listening at `localhost:8080`. The server
+exposes the example's logical node routes under `/node/{id}`:
+
+```sh
+devenv shell cargo run -p showcase-client --example check_server
+```
+
+See [architecture decisions](docs/decisions.md) for the rationale behind the
+transport boundary and middleware composition.
 
 ## Run a Tokio worker
 

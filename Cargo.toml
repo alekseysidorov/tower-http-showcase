@@ -19,11 +19,13 @@ showcase-api = { path = "crates/api", version = "0.0.0" }
 fractal-core = { path = "crates/fractal-core", version = "0.0.0" }
 
 axum = "0.8"
+bytes = "1"
 eyre = "0.6.12"
 png = "0.18"
 futures-util = "0.3.31"
 headers = "0.4"
 http = "1.3.1"
+http-body-util = "0.1"
 humantime-serde = "1.1.1"
 log = { version = "0.4.27", features = ["kv_serde"] }
 rand = "0.9"
@@ -37,8 +39,14 @@ tower = { version = "0.5.2", features = [
   "buffer",
   "discover",
   "balance",
+  "retry",
 ] }
-tower-http = { version = "0.7.0" }
+tower-http = { version = "0.7.0", features = [
+  "map-request-body",
+  "map-response-body",
+  "set-header",
+  "util",
+] }
 tower-http-client = "0.6.1"
 tower-reqwest = "0.6.1"
 context-logger = "0.2.0"
