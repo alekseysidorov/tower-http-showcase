@@ -7,6 +7,7 @@ use crate::state::SharedAppState;
 
 pub fn make_router(state: SharedAppState) -> Router {
     Router::new()
+        .route("/health", get(routes::health_check))
         .route("/hello", get(routes::hello_world))
         .route("/render", post(routes::render_tile))
         .with_state(state)
@@ -21,6 +22,10 @@ mod routes {
     use std::time::Instant;
 
     use crate::state::{HelloService, SharedAppState};
+
+    pub async fn health_check() -> StatusCode {
+        StatusCode::NO_CONTENT
+    }
 
     pub async fn hello_world(
         State(state): State<SharedAppState>,

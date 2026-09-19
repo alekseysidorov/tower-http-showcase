@@ -27,3 +27,6 @@ jobs:
 
       - name: Test workspace
         run: devenv shell cargo test --workspace
+
+      - name: Test a real Tokio worker over HTTP
+        run: devenv tasks run tests:worker-http

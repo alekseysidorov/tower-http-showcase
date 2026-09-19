@@ -25,3 +25,20 @@ curl http://127.0.0.1:8080/render \
 
 The response contains the tile metadata and row-major RGB8 pixel bytes as a
 JSON array.
+
+## Tests
+
+Unit tests and Wiremock-backed client tests run with:
+
+```sh
+devenv tasks run tests
+```
+
+The task namespace includes unit tests, Wiremock-backed HTTP client tests, and a
+real Tokio worker smoke test that starts the server, waits for `/health`, then
+posts a tile to `/render` and checks the response. Run only the real worker test
+with:
+
+```sh
+devenv tasks run tests:worker-http
+```
