@@ -1539,6 +1539,7 @@ dependencies = [
  "log",
  "rand 0.9.5",
  "serde",
+ "serde_json",
  "showcase-api",
  "structured-logger",
  "tokio",

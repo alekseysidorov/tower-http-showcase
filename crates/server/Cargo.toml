@@ -21,3 +21,6 @@ serde = { workspace = true }
 structured-logger = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
