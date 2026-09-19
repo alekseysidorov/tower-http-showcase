@@ -1,10 +1,9 @@
 # tower-http-showcase
 
-A small distributed Mandelbrot rendering and tracing lab. The repository
-already contains a Tower client-side load-balancing demo; this first milestone
-adds a deterministic, synchronous tile renderer and a Tokio worker. Later
-milestones will connect tile rendering to the balancer, add Compio, and export
-distributed traces.
+A small distributed Mandelbrot rendering and tracing lab. It includes a
+deterministic tile renderer, a Tokio worker, and a renderer that assembles a PNG
+from tiles returned by one worker. Later milestones will connect rendering to
+the existing Tower load balancer, add Compio, and export distributed traces.
 
 ## Run a Tokio worker
 
@@ -26,6 +25,19 @@ curl http://127.0.0.1:8080/render \
 The response contains the tile metadata and row-major RGB8 pixel bytes as a
 JSON array.
 
+## Render a PNG through one worker
+
+The renderer splits an image into tiles, sends them concurrently to one worker,
+and assembles the responses by tile coordinates before writing the PNG. The
+default output is `target/mandelbrot.png`.
+
+```sh
+devenv shell cargo run -p showcase-renderer -- \
+  --worker http://127.0.0.1:8080 \
+  --width 1024 --height 1024 --tile-size 128 \
+  --max-iterations 500 --output target/mandelbrot.png
+```
+
 ## Tests
 
 Unit tests and Wiremock-backed client tests run with:
@@ -34,11 +46,10 @@ Unit tests and Wiremock-backed client tests run with:
 devenv tasks run tests
 ```
 
-The task namespace includes unit tests, Wiremock-backed HTTP client tests, and a
-real Tokio worker smoke test that starts the server, waits for `/health`, then
-posts a tile to `/render` and checks the response. Run only the real worker test
-with:
+The task namespace includes unit tests, Wiremock-backed HTTP client tests, a
+worker HTTP smoke test, and a renderer HTTP task that produces a PNG using a
+real Tokio worker. Run only the renderer task with:
 
 ```sh
-devenv tasks run tests:worker-http
+devenv tasks run tests:renderer-http
 ```

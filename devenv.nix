@@ -54,4 +54,17 @@ in
         <<< "$response" >/dev/null
     '';
   };
+
+  tasks."tests:renderer-http" = {
+    after = [ "devenv:processes:test-worker@ready" ];
+    exec = ''
+      output=target/renderer-smoke.png
+      cargo run --quiet -p showcase-renderer -- \
+        --worker ${testWorkerUrl} \
+        --width 3 --height 2 --tile-size 1 --max-iterations 32 \
+        --output "$output"
+
+      test "$(od -An -tx1 -N8 "$output" | tr -d '[:space:]')" = "89504e470d0a1a0a"
+    '';
+  };
 }
