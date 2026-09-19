@@ -170,6 +170,27 @@ mod tests {
     }
 
     #[test]
+    fn reference_tile_has_expected_fnv1a_checksum() {
+        let spec = TileSpec {
+            region: ComplexRegion {
+                min_re: -2.0,
+                max_re: 1.0,
+                min_im: -1.0,
+                max_im: 1.0,
+            },
+            width: 4,
+            height: 3,
+            max_iterations: 32,
+        };
+        let tile = render_tile(&spec).unwrap();
+        let checksum = tile.pixels.iter().fold(0x811c_9dc5_u32, |hash, byte| {
+            (hash ^ u32::from(*byte)).wrapping_mul(0x0100_0193)
+        });
+
+        assert_eq!(checksum, 0xf4c9_220e);
+    }
+
+    #[test]
     fn points_inside_the_set_are_black() {
         assert_eq!(
             render_tile(&point(0.0, 0.0, 100)).unwrap().pixels,
